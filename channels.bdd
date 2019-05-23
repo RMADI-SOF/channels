@@ -1,0 +1,84 @@
+DROP DATABASE channels; 
+CREATE DATABASE channels; 
+USE channels; 
+
+DROP TABLE IF EXISTS contacts; 
+CREATE TABLE IF NOT EXISTS contacts(
+	contact_number INT PRIMARY key,
+	Name VARCHAR(255) NOT NULL,
+	Type VARCHAR(255),
+	ID INT,
+	Rx_Tone VARCHAR(255)
+);
+
+DROP TABLE IF EXISTS messages; 
+CREATE TABLE IF NOT EXISTS messages (
+	message INT,
+	Text_content VARCHAR(255) NOT NULL
+);
+
+DROP TABLE IF EXISTS group_lists; 
+CREATE TABLE IF NOT EXISTS group_lists (
+	grouplist INT PRIMARY key,
+	Name VARCHAR(255) NOT NULL,
+	contact_number INT, 
+	foreign key (contact_number) references contacts(contact_number)
+);
+
+
+DROP TABLE IF EXISTS scan_lists; 
+CREATE TABLE IF NOT EXISTS scan_lists(
+	scan_list int PRIMARY KEY,
+	zone_name VARCHAR(255) NOT NULL,
+	pch1 VARCHAR(255) NOT NULL,
+	pch2 VARCHAR(255) NOT NULL,
+	Txch VARCHAR(255) NOT NULL,
+	channel_number INT
+);
+
+
+-- CREATE TYPE Admit_criteria_type as ENUM('High' , 'Low ');
+DROP TABLE IF EXISTS digital_channels; 
+CREATE TABLE IF NOT EXISTS digital_channels (
+    channel_number INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    receive_freq float,
+    Transmit_frequency  FLOAT,
+    Transmit_power ENUM('High' , 'Low') NOT NULL,
+    scan_list INT,
+    TRANSMIT_tout INT check ( TRANSMIT_tout % 15 = 0 ) ,
+    Receive_only ENUM('-' , '+'),
+    Admit_criteria ENUM('-' ,'Free' , 'Color') NOT NULL,
+    color_code INT check ( color_code <= 15 ),
+    time_slot ENUM('1' ,'2'),
+    receive_group_list INT,
+    contact_for_transmit INT,
+    foreign key(receive_group_list)  references group_lists(grouplist),
+    foreign key (contact_for_transmit) references contacts(contact_number),
+    foreign key (scan_list) references scan_lists(scan_list)
+);  
+
+DROP TABLE IF EXISTS analog_channels; 
+CREATE TABLE IF NOT EXISTS analog_channels (
+    channel_number INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    receive_freq float,
+    Transmit_frequency  FLOAT,
+    Transmit_power ENUM('High' , 'Low') NOT NULL,
+	scan_list INT,
+    TRANSMIT_tout INT check ( TRANSMIT_tout % 15 = 0 ) ,
+    Receive_only ENUM('-' , '+'),
+    Admit_criteria ENUM('-' ,'Free' , 'Tone') NOT NULL,
+    Squelch_level ENUM ('Normal', 'Tight'), 
+    Band_width INT,
+    foreign key (scan_list) references scan_lists(scan_list)
+
+);
+
+DROP TABLE IF EXISTS channel_zones; 
+CREATE TABLE IF NOT EXISTS channel_zones(
+	zone int PRIMARY KEY,
+	name VARCHAR(255) NOT NULL,
+	channel_number INT
+);
+
